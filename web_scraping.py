@@ -3,7 +3,7 @@ import requests
 import re
 import pandas as pd
 import argparse
-
+import tqdm
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -24,7 +24,7 @@ def parse_args():
 def run_scrapping(args_):
     df = pd.DataFrame()
 
-    for i in range(args_.start_file, args_.final_file): #800-1678
+    for i in tqdm(range(args_.start_file, args_.final_file)): #800-1678  last 2132
         url = f"https://www.formations-spatiales.fr/en/training-courses/{i}.htm"
         result = requests.get(url)
         doc = BeautifulSoup(result.text, "html.parser")
@@ -33,15 +33,22 @@ def run_scrapping(args_):
         if trainp[0].find_all("small"):
             print(f"#############{i}#############")
 
-
             #Title
             title = trainp[0].find("h3").string
 
             strong = trainp[0].find_all("strong")
 
+            # Topics
+            topics = trainp[0].find("Topics")
+            topics = topics.parent.findNext('li').contents
+            topics = ' '.join(topics)
+
+            # Disciplines
+            disciplines = trainp[0].find("Disciplines").parent.findNext('li').contents
+            disciplines = ' '.join(disciplines)
+
             # Organization
             small = trainp[0].find_all("small")[0]
-            # print(small)
             org = small.string
             org = re.sub('[()]', '', org)
             # Way of training
@@ -87,11 +94,11 @@ def run_scrapping(args_):
 
             df = df.append({'ID':i,'Title': title, 'Organisation': org, 'Way of training': wot, 'Language': lang, 'Place': place,
                             'Diploma': dipl, 'Level Required': title, 'URL': url_prog, 'Objectives': obj_, 'Public concerned': pub_,
-                            'Degree Level (EU)': deg_, 'Admission requirements': adm_, 'Prerequisites': pre_, 'Duration and terms': dura_}, ignore_index=True)
+                            'Degree Level (EU)': deg_, 'Admission requirements': adm_, 'Topics': topics, 'Disciplines': disciplines, 'Prerequisites': pre_, 'Duration and terms': dura_}, ignore_index=True)
 
 
     # save merged df to excel file
-    df.to_excel("CNES_DB_v0.xlsx", sheet_name='CNES_Training_programs', index=False)
+    df.to_excel("CNES_DB_probe.xlsx", sheet_name='CNES_Training_programs', index=False)
     #df.to_csv("CNES_DB_v0_v0.csv", sep=',', encoding='latin-1', index=False)
 
 

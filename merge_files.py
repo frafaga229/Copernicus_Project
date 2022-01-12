@@ -1,6 +1,7 @@
 import csv
 import os
 import tqdm
+import pandas as pd
 import argparse
 from dict_format import *
 
@@ -30,11 +31,12 @@ def format_col(header_):
     return col_format
 
 
-def find_csv_filenames( path_to_dir, suffix=".csv" ):
+def find_csv_filenames(path_to_dir, suffix=".csv"):
     filenames = os.listdir(path_to_dir)
-    return [ filename for filename in filenames if filename.endswith( suffix ) ]
+    return [filename for filename in filenames if filename.endswith(suffix)]
 
 def merge_files(args_):
+    #format
     PATH = args_.root_path
     PATH_F = os.path.join(args_.root_path, "format_data")
     os.makedirs(PATH_F, exist_ok=True)
@@ -61,17 +63,16 @@ def merge_files(args_):
             writer.writerow(row)
         # close the file
         f.close()
+    #merge
+    all_files = find_csv_filenames(PATH_F)
+    all_df = []
+    for f in all_files:
+        df = pd.read_csv(f, sep=',', encoding='latin-1')
+        #df['file'] = f.split('/')[-1]
+        all_df.append(df)
 
-#
-# # format bdd_spatial_DB.csv
-# rows2 = []
-# with open("./data/bdd_spatial_DB.csv", 'r') as file:
-#     csvreader = csv.reader(file)
-#     header2 = next(csvreader)
-#     for row in csvreader:
-#         rows2.append(row)
-# print(header2)
-# print(rows2[0:5])
+    merged_df = pd.concat(all_df, ignore_index=True, sort=True)
+
 
 if __name__ == "__main__":
     args = parse_args()
