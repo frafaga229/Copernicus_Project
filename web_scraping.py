@@ -4,16 +4,19 @@ import re
 import pandas as pd
 import argparse
 import tqdm
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '--start_file',
         help = 'number of the initial file',
+        required=True,
         type = int
     )
     parser.add_argument(
         '--final_file',
         help = 'number of the last file',
+        required=True,
         type = int
     )
 
@@ -23,8 +26,7 @@ def parse_args():
 
 def run_scrapping(args_):
     df = pd.DataFrame()
-
-    for i in tqdm(range(args_.start_file, args_.final_file)): #800-1678  last 2132
+    for i in range(args_.start_file, args_.final_file): #800-1678  last 2132
         url = f"https://www.formations-spatiales.fr/en/training-courses/{i}.htm"
         result = requests.get(url)
         doc = BeautifulSoup(result.text, "html.parser")
@@ -35,17 +37,25 @@ def run_scrapping(args_):
 
             #Title
             title = trainp[0].find("h3").string
-
             strong = trainp[0].find_all("strong")
 
             # Topics
-            topics = trainp[0].find("Topics")
-            topics = topics.parent.findNext('li').contents
-            topics = ' '.join(topics)
+            topics = None
+            if trainp[0].find(string="Topics"):
+                topics = trainp[0].find(string="Topics").findNext('ul').find_all('li')
+                all_topics = []
+                for tp in topics:
+                    all_topics.append(tp.get_text())
+                topics = ' '.join(all_topics)
 
             # Disciplines
-            disciplines = trainp[0].find("Disciplines").parent.findNext('li').contents
-            disciplines = ' '.join(disciplines)
+            disciplines = None
+            if trainp[0].find('h4', string="Disciplines"):
+                disciplines = trainp[0].find('h4', string="Disciplines").findNext('ul').find_all('li')
+                all_disciplines = []
+                for dc in disciplines:
+                    all_disciplines.append(dc.get_text())
+                disciplines = ' '.join(all_disciplines)
 
             # Organization
             small = trainp[0].find_all("small")[0]
@@ -76,7 +86,7 @@ def run_scrapping(args_):
                 url_prog = trainp[0].find_all("a")[-1].get('href')
 
             p = trainp[0].find_all("p")
-            obj_, pub_, deg_, adm_, pre_, dura_ = None, None, None, None, None, None
+            obj_ = pub_ = deg_ = adm_ = pre_ = dura_ = None
             for pi in p:
 
                 if pi.find("strong", string="Objectives"):
@@ -98,7 +108,7 @@ def run_scrapping(args_):
 
 
     # save merged df to excel file
-    df.to_excel("CNES_DB_probe.xlsx", sheet_name='CNES_Training_programs', index=False)
+    df.to_excel("CNES_DB_V2.xlsx", sheet_name='CNES_Training_programs', index=False)
     #df.to_csv("CNES_DB_v0_v0.csv", sep=',', encoding='latin-1', index=False)
 
 
