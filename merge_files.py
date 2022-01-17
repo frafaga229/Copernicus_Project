@@ -1,14 +1,13 @@
 import csv
 import os
-import tqdm
+
 import pandas as pd
 import argparse
 from dict_format import *
 
-
 def parse_args():
-    parser = argparse.ArgumentParser()
 
+    parser = argparse.ArgumentParser()
     parser.add_argument(
         'root_path',
         help='path where the files to merge are'
@@ -17,8 +16,6 @@ def parse_args():
     args = parser.parse_args()
 
     return args
-
-
 
 def format_col(header_):
 
@@ -30,12 +27,13 @@ def format_col(header_):
             col_format.append(col_name)
     return col_format
 
-
 def find_csv_filenames(path_to_dir, suffix=".csv"):
+
     filenames = os.listdir(path_to_dir)
     return [filename for filename in filenames if filename.endswith(suffix)]
 
 def merge_files(args_):
+
     #format
     PATH = args_.root_path
     PATH_F = os.path.join(args_.root_path, "format_data")
@@ -52,7 +50,7 @@ def merge_files(args_):
                 rows.append(row)
 
         # Save new csv with format
-        f = open(os.path.join(PATH_F, f"file_{file_id}.csv"), 'w')
+        f = open(os.path.join(PATH_F, f"{file_dir}_{file_id}.csv"), 'w')
 
         # create the csv writer
         writer = csv.writer(f)
@@ -63,17 +61,29 @@ def merge_files(args_):
             writer.writerow(row)
         # close the file
         f.close()
+
     #merge
     all_files = find_csv_filenames(PATH_F)
+
     all_df = []
     for f in all_files:
-        df = pd.read_csv(f, sep=',', encoding='latin-1')
-        #df['file'] = f.split('/')[-1]
+        df = pd.read_csv(os.path.join(PATH_F, f), sep=',', encoding='latin-1')
+        # print(df)
+        df['file'] = f.split('/')[-1]
         all_df.append(df)
 
     merged_df = pd.concat(all_df, ignore_index=True, sort=True)
 
+    # drop duplicates rows in the df
+    merged_df = merged_df.drop_duplicates()
+    print(merged_df.info())
+
+    # save merged df to excel file
+    merged_df.to_excel(os.path.join(PATH_F, "Training_merged_DB_v3.xlsx"), sheet_name='Training_programs', index=False)
+    #merged_df.to_csv("Training_merged_DB_v3.csv", sep=',', encoding='latin-1', index=False)
+
 
 if __name__ == "__main__":
+
     args = parse_args()
     merge_files(args)

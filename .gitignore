@@ -1,6 +1,9 @@
 # data
 *.xlsx
 *.csv
+data/
+format_data/
+scrapping_data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
