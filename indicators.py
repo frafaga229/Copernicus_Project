@@ -25,13 +25,14 @@ def get_indicator_plots(args_):
     merged_df = pd.read_csv(args_.path_file, sep=',', encoding='latin-1')
 
     # we select columns to plot
-    col_info = ['Duration and terms', 'Way of training', 'Disciplines', 'Language', 'Level',
+    col_info = ['Duration and terms', 'Way of training', 'Disciplines', 'Language',
                 'Org. Country', 'Organisation', 'file', 'Diploma', 'Level Required']
 
     # create a writer for excel file
+
     writer = pd.ExcelWriter('indicators_plot.xlsx', engine='xlsxwriter')
     for col in col_info:
-        print(col)
+        #print(col)
         data2exp = merged_df[col].value_counts()
         data2exp.to_excel(writer, sheet_name=col)
         try:
@@ -49,7 +50,9 @@ def get_indicator_plots(args_):
 
 
     # selected column headers we want to use
-    new_headers = ['Title', 'Training content']
+    new_headers = ['Title', 'Training Content']
+        # , 'Admission Requirements', 'Org. Country',
+        #            'Prerequisites', 'Public concerned', 'Level Required']
 
     # remove unwanted columns keep selected headers
     dataset = pd.DataFrame(merged_df, columns=new_headers)
@@ -66,10 +69,11 @@ def get_indicator_plots(args_):
     stop_words = stop_words.union(new_words, stop_words_f)
 
     for col in new_headers:
-        # convert to lowercase
-        dataset[col] = dataset[col].str.lower()
+        print(col)
         # convert desc to string
         dataset[col] = dataset[col].astype(str)
+        # convert to lowercase
+        dataset[col] = dataset[col].str.lower()
         #
         dataset[col] = dataset[col].apply(lambda x: ' '.join([item for item in x.split() if item not in stop_words]))
         #
@@ -89,7 +93,7 @@ def get_indicator_plots(args_):
         new_df.to_excel(writer, sheet_name='keywords_'+col)
 
         worksheet = writer.sheets['keywords_'+col]
-        worksheet.insert_image('C2', f'keywords_{col}.png')
+        worksheet.insert_image('C2', f'keyword_{col}.png')
 
     writer.save()
 

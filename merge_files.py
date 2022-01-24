@@ -36,7 +36,7 @@ def merge_files(args_):
 
     #format
     PATH = args_.root_path
-    PATH_F = os.path.join(args_.root_path, "format_data")
+    PATH_F = os.path.join(PATH, "format_data")
     os.makedirs(PATH_F, exist_ok=True)
     files = find_csv_filenames(PATH)
     for file_id, file_dir in enumerate(files):
@@ -50,7 +50,10 @@ def merge_files(args_):
                 rows.append(row)
 
         # Save new csv with format
-        f = open(os.path.join(PATH_F, f"{file_dir}_{file_id}.csv"), 'w')
+        f_name = f"{file_dir}_{file_id}.csv"
+
+        #TODO the path to save in format_data folder is not working properly
+        f = open(os.path.join(PATH_F, f_name), 'w')
 
         # create the csv writer
         writer = csv.writer(f)
@@ -67,6 +70,7 @@ def merge_files(args_):
 
     all_df = []
     for f in all_files:
+        #TODO check if we can use the excel files directly instead of csv file, or add the option in the args
         df = pd.read_csv(os.path.join(PATH_F, f), sep=',', encoding='latin-1')
         # print(df)
         df['file'] = f.split('/')[-1]
@@ -80,7 +84,7 @@ def merge_files(args_):
 
     # save merged df to excel file
     merged_df.to_excel(os.path.join(PATH_F, "Training_merged_DB_v3.xlsx"), sheet_name='Training_programs', index=False)
-    #merged_df.to_csv("Training_merged_DB_v3.csv", sep=',', encoding='latin-1', index=False)
+    merged_df.to_csv(os.path.join(PATH_F, "Training_merged_DB_v3.csv"), sep=',', encoding='UTF-8', index=False)
 
 
 if __name__ == "__main__":
