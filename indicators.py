@@ -2,9 +2,16 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import argparse
 from nltk.corpus import stopwords
+import os
 
 
 def parse_args():
+
+    '''
+    use: python indicators.py ./data/try_123
+
+    :return:
+    '''
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -16,13 +23,25 @@ def parse_args():
 
     return args
 
+def find_xlsx_filenames(path_to_dir, suffix=".xlsx"):
+    filenames = os.listdir(path_to_dir)
+    return [filename for filename in filenames if filename.endswith(suffix)]
+
 def get_indicator_plots(args_):
     '''
     create a excel file with bar plots of some columns from the DB-training
 
     '''
+    PATH = args_.path_file
+    PATH_M = os.path.join(PATH, "merged_data")
+    PATH_I = os.path.join(PATH, "plot_indicators")
+    os.makedirs(PATH_I, exist_ok=True)
+
+    file_name = find_xlsx_filenames(PATH_M)[0]
     # Read csv file
-    merged_df = pd.read_csv(args_.path_file, sep=',', encoding='latin-1')
+    merged_df = pd.read_excel(PATH_M+f'/{file_name}', 'Training_programs', index_col=None)
+    #merged_df = merged_df.to_csv('csvfile.csv', encoding='latin-1')
+    #merged_df = pd.read_csv(PATH_M+f'/{file_name}', sep=',', encoding='latin-1')
 
     # we select columns to plot
     col_info = ['Duration and terms', 'Way of training', 'Disciplines', 'Language',
@@ -30,9 +49,8 @@ def get_indicator_plots(args_):
 
     # create a writer for excel file
 
-    writer = pd.ExcelWriter('indicators_plot.xlsx', engine='xlsxwriter')
+    writer = pd.ExcelWriter(PATH_I+'/indicators_plot.xlsx', engine='xlsxwriter')
     for col in col_info:
-        #print(col)
         data2exp = merged_df[col].value_counts()
         data2exp.to_excel(writer, sheet_name=col)
         try:
@@ -43,7 +61,7 @@ def get_indicator_plots(args_):
         figure.set_size_inches(6, 5)
         plt.ylabel('n')
         plt.title(col)
-        plt.savefig(f'{col}_freq.png', dpi=200, bbox_inches='tight')
+        plt.savefig(PATH_I+f'/{col}_freq.png', dpi=200, bbox_inches='tight')
 
         worksheet = writer.sheets[col]
         worksheet.insert_image('C2', f'{col}_freq.png')
