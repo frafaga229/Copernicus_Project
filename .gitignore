@@ -4,6 +4,7 @@
 data/
 format_data/
 scrapping_data/
+indicator_plots/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

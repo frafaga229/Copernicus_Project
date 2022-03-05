@@ -87,7 +87,6 @@ def get_indicator_plots(args_):
     stop_words = stop_words.union(new_words, stop_words_f)
 
     for col in new_headers:
-        print(col)
         # convert desc to string
         dataset[col] = dataset[col].astype(str)
         # convert to lowercase
