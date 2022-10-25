@@ -6,6 +6,7 @@ import argparse
 from dict_format import *
 from tqdm import tqdm
 
+
 def parse_args():
     '''
     use: python merge_files.py ./data/try_123
