@@ -32,7 +32,7 @@ def get_indicator_plots():
     print('#' * 80)
     print('The database of the training programs must be in excel format, copy the absolut \n '
           'path of the excel file (e.g. C:\Copernicus_Project\Training_merged_DB_v6.xlsx)')
-    PATH_E = input('and paste the excel file path (.xlsx):')
+    PATH_E = input('and paste it here (.xlsx):')
     PATH_E = Path(PATH_E)
     PATH = PATH_E.parent
     PATH_I = os.path.join(PATH, "plot_indicators")
